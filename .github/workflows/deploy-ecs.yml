@@ -46,6 +46,6 @@ jobs:
       - name: Trigger CodeDeploy deployment
         run: |
           aws deploy create-deployment \
-            --application-name strapi-codedeploy-app \
-            --deployment-group-name strapi-blue-green \
+            --application-name docker-strapi-codedeploy-app \
+            --deployment-group-name docker-strapi-group \
             --revision file://revision.json
