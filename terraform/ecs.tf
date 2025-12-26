@@ -1,21 +1,20 @@
-############################################
 # CloudWatch Log Group
-############################################
+
 resource "aws_cloudwatch_log_group" "strapi" {
-  name              = "/ecs/strapi"
+  name              = "/ecs/strapi/docker-con"
   retention_in_days = 7
 }
 
-############################################
+
 # ECS Cluster
-############################################
+
 resource "aws_ecs_cluster" "main" {
-  name = "strapi-cluster"
+  name = "docker-strapi-cluster"
 }
 
-############################################
+
 # ECS Capacity Providers (FARGATE_SPOT)
-############################################
+
 resource "aws_ecs_cluster_capacity_providers" "strapi" {
   cluster_name = aws_ecs_cluster.main.name
 
@@ -30,11 +29,11 @@ resource "aws_ecs_cluster_capacity_providers" "strapi" {
   }
 }
 
-############################################
+
 # ECS Task Definition
-############################################
+
 resource "aws_ecs_task_definition" "strapi" {
-  family                   = "strapi-task"
+  family                   = "docker-strapi-task"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = "512"
@@ -74,18 +73,18 @@ resource "aws_ecs_task_definition" "strapi" {
         options = {
           awslogs-group         = aws_cloudwatch_log_group.strapi.name
           awslogs-region        = var.region
-          awslogs-stream-prefix = "ecs/strapi"
+          awslogs-stream-prefix = "ecs/strapi/docker-con"
         }
       }
     }
   ])
 }
 
-############################################
+
 # ECS Service (ALB + FARGATE_SPOT + CODE_DEPLOY)
-############################################
+
 resource "aws_ecs_service" "strapi" {
-  name            = "strapi-service"
+  name            = "docker-strapi-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.strapi.arn
   desired_count   = 1
@@ -117,7 +116,7 @@ resource "aws_ecs_service" "strapi" {
     security_groups = [aws_security_group.ecs_sg.id]
   }
 
-  # IMPORTANT: attach ONLY to BLUE target group
+ 
   load_balancer {
     target_group_arn = aws_lb_target_group.blue.arn
     container_name   = "strapi"
