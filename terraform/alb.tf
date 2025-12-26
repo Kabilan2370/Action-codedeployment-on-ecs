@@ -1,5 +1,5 @@
 resource "aws_lb" "strapi" {
-  name               = "strapi-alb"
+  name               = "docker-strapi-alb"
   load_balancer_type = "application"
   subnets             = [
     aws_subnet.public.id,
@@ -10,7 +10,7 @@ resource "aws_lb" "strapi" {
 
 # BLUE target group
 resource "aws_lb_target_group" "blue" {
-  name        = "strapi-blue-tg"
+  name        = "blue-docker-strapi-tg"
   port        = 1337
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
@@ -24,7 +24,7 @@ resource "aws_lb_target_group" "blue" {
 
 # GREEN target group
 resource "aws_lb_target_group" "green" {
-  name        = "strapi-green-tg"
+  name        = "green-docker-strapi-tg"
   port        = 1337
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
