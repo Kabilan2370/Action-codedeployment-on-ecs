@@ -1,9 +1,6 @@
-# =========================
-# ECS EXECUTION ROLE
-# (Pull image, write logs)
-# =========================
+
 resource "aws_iam_role" "ecs_execution" {
-  name = "ecsTaskExecutionRole-strapi"
+  name = "docker-strapi-ecsTaskExecutionRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -25,12 +22,10 @@ resource "aws_iam_role_policy_attachment" "ecs_exec_policy" {
 }
 
 
-# =========================
 # ECS TASK ROLE
-# (App-level permissions)
-# =========================
+
 resource "aws_iam_role" "ecs_task_role" {
-  name = "ecsTaskRole-strapi"
+  name = "ecsTaskRole-docker-strapi"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -46,8 +41,7 @@ resource "aws_iam_role" "ecs_task_role" {
   })
 }
 
-# TEMP: Allow Strapi to access S3 uploads bucket
-# (We will tighten this later)
+
 resource "aws_iam_role_policy_attachment" "ecs_task_s3" {
   role       = aws_iam_role.ecs_task_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
@@ -55,7 +49,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_s3" {
 
 
 resource "aws_iam_role_policy" "ecs_exec_ssm" {
-  name = "ecs-exec-ssm-policy"
+  name = "ecs-exec-ssm-policy-docker-strapi"
   role = aws_iam_role.ecs_task_role.id
 
   policy = jsonencode({
@@ -77,7 +71,7 @@ resource "aws_iam_role_policy" "ecs_exec_ssm" {
 
 
 resource "aws_iam_role" "codedeploy_role" {
-  name = "codedeploy-ecs-role"
+  name = "codedeploy-ecs-role-docker-strapi"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
