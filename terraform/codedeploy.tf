@@ -1,11 +1,11 @@
 resource "aws_codedeploy_app" "ecs" {
-  name             = "strapi-codedeploy-app"
+  name             = "docker-strapi-codedeploy-app"
   compute_platform = "ECS"
 }
 
 resource "aws_codedeploy_deployment_group" "ecs" {
   app_name              = aws_codedeploy_app.ecs.name
-  deployment_group_name = "strapi-blue-green"
+  deployment_group_name = "docker-strapi-group"
   service_role_arn      = aws_iam_role.codedeploy_role.arn
 
   # REQUIRED FOR ECS
