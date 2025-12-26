@@ -1,6 +1,4 @@
 
-
-
 resource "aws_db_instance" "postgres" {
   engine            = "postgres"
   engine_version    = "15"
