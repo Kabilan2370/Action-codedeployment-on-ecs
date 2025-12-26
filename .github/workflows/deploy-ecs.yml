@@ -3,8 +3,11 @@ name: CD - Deploy Strapi via CodeDeploy
 on:
   workflow_run:
     workflows: ["CI - Build & Push Strapi Image"]
-    types:
-      - completed
+    types: [completed]
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPO: docker-strapi-ecr
 
 jobs:
   deploy:
@@ -12,25 +15,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Render ECS task definition
         run: |
-          sed "s|IMAGE_URI|docker.io/${{ secrets.DOCKERHUB_USERNAME }}/strapi:${{ github.event.workflow_run.head_sha }}|" \
-          appspec/taskdef.json > taskdef-rendered.json
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${{ github.event.workflow_run.head_sha }}
+
+          sed "s|IMAGE_URI|$IMAGE_URI|" \
+            appspec/taskdef.json > taskdef-rendered.json
 
       - name: Register ECS task definition
         run: |
-          aws ecs register-task-definition \
-            --cli-input-json file://taskdef-rendered.json
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://taskdef-rendered.json \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
 
       - name: Create CodeDeploy revision file
         run: |
@@ -38,14 +45,18 @@ jobs:
           {
             "revisionType": "AppSpecContent",
             "appSpecContent": {
-              "content": "$(base64 -w 0 appspec/appspec.yaml)"
+              "content": "$(sed ':a;N;$!ba;s/\n/\\n/g' appspec/appspec.yaml)"
             }
           }
           EOF
 
       - name: Trigger CodeDeploy deployment
         run: |
-          aws deploy create-deployment \
+          DEPLOYMENT_ID=$(aws deploy create-deployment \
             --application-name docker-strapi-codedeploy-app \
             --deployment-group-name docker-strapi-group \
-            --revision file://revision.json
+            --revision file://revision.json \
+            --query 'deploymentId' \
+            --output text)
+
+          aws deploy wait deployment-successful --deployment-id $DEPLOYMENT_ID
