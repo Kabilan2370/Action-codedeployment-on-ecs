@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "strapi-high-cpu"
+  alarm_name          = "docker-strapi-high-cpu"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
