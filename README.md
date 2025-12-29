@@ -44,7 +44,9 @@ React (also known as React.js or ReactJS) is an open-source JavaScript library f
 
       http://localhost:3000
 
-**6. Create docker-compose.yml**
+**6. Using dockerfile to create a react image**
+
+**7. Create docker-compose.yml**
 
         version: "3.8"
 
@@ -71,7 +73,7 @@ React (also known as React.js or ReactJS) is an open-source JavaScript library f
               DATABASE_SSL: "false"
               INIT_FRONTEND_API_TOKENS: default:development.unleash-insecure-api-token
 
-**7. Run the docker compose file, using -d the container will run in the background**
+**8. Run the docker compose file, using -d the container will run in the background**
 
       sudo docker-compose up -d
 
