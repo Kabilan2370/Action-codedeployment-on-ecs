@@ -1,8 +1,8 @@
 name: CI - Build & Push Strapi Image
 
-on:
-  push:
-    branches: [ "main" ]
+# on:
+#   push:
+#     branches: [ "main" ]
 
 env:
   AWS_REGION: ap-south-1
